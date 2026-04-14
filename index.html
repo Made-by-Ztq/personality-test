@@ -3,388 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNAPSE Pro | 行为模式高精度解析</title>
+    <title>SYNAPSE | 极致行为解析</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
 
         :root {
-            --primary: #00ffff;
-            --secondary: #7000ff;
-            --bg: #000000;
-            --glass: rgba(10, 10, 15, 0.7);
+            --primary: #00f3ff;
+            --secondary: #ff00ea;
+            --bg: #030303;
             --border: rgba(255, 255, 255, 0.18);
-            --text: #ffffff;
-            --glow: 0 0 15px rgba(0, 255, 255, 0.4);
+            --mouse-x: 50%;
+            --mouse-y: 50%;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; cursor: none; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; cursor: crosshair; }
+        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; perspective: 2000px; }
 
-        /* ----------------------- 1. 极致动效背景 ----------------------- */
-        #canvas-stage {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            filter: contrast(1.5) brightness(0.7);
+        /* --- 1. 增强型粘滞流体背景 --- */
+        .fluid-container {
+            position: fixed; inset: -10%; z-index: 0;
+            filter: url('#gooey-ultra');
+            background: #000;
+        }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.7;
+            mix-blend-mode: screen; animation: float-blob 25s infinite alternate ease-in-out;
+        }
+        .blob:nth-child(1) { width: 700px; height: 700px; background: radial-gradient(circle, #0033ff, transparent); top: -10%; left: -10%; }
+        .blob:nth-child(2) { width: 600px; height: 600px; background: radial-gradient(circle, #ff00ea, transparent); bottom: -10%; right: -10%; animation-delay: -7s; }
+        .blob:nth-child(3) { width: 500px; height: 500px; background: radial-gradient(circle, #00f3ff, transparent); top: 30%; left: 30%; animation-delay: -14s; }
+
+        @keyframes float-blob {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(15vw, 10vh) scale(1.4) rotate(90deg); }
+            100% { transform: translate(-10vw, 20vh) scale(0.8) rotate(180deg); }
         }
 
-        .noise-overlay {
-            position: fixed;
-            inset: 0;
-            background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* ----------------------- 2. 交互光标系统 ----------------------- */
-        #cursor-core {
-            position: fixed;
-            width: 8px; height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10001;
-            box-shadow: 0 0 20px #fff;
-            transition: transform 0.1s;
-        }
-
-        #cursor-aura {
-            position: fixed;
-            width: 44px; height: 44px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* ----------------------- 3. 超高级液态玻璃容器 ----------------------- */
+        /* --- 2. 极致玻璃面板 --- */
         .master-frame {
-            position: relative;
-            z-index: 10;
-            width: 95vw;
-            max-width: 1200px;
-            height: 700px;
-            display: grid;
-            grid-template-columns: 350px 1fr 280px;
-            gap: 20px;
-            padding: 20px;
-            transform-style: preserve-3d;
+            position: relative; z-index: 10; width: 92vw; max-width: 1100px; height: 650px;
+            display: grid; grid-template-columns: 300px 1fr; gap: 30px;
+            transition: transform 0.15s ease-out;
         }
 
         .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(40px) saturate(200%);
-            -webkit-backdrop-filter: blur(40px) saturate(200%);
+            /* 多层模拟折射：基础背景 + 高级磨砂 */
+            background: linear-gradient(160deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 100%);
+            backdrop-filter: blur(100px) saturate(220%) contrast(110%);
+            -webkit-backdrop-filter: blur(100px) saturate(220%) contrast(110%);
             border: 1px solid var(--border);
-            border-radius: 36px;
+            border-radius: 45px;
+            padding: 45px;
             position: relative;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.05);
-            transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 
+                0 60px 120px rgba(0,0,0,0.9),
+                inset 0 0 0 1px rgba(255,255,255,0.1),
+                inset 0 2px 20px rgba(255,255,255,0.05);
+            display: flex; flex-direction: column;
         }
 
-        /* 装饰用SVG边框 */
+        /* 玻璃边缘动态高光 */
         .glass-panel::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 36px;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent 40%, rgba(255,255,255,0.1));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            pointer-events: none;
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.15), transparent 45%);
+            z-index: 1;
         }
 
-        /* ----------------------- 4. 侧边栏仪表盘 ----------------------- */
-        .side-bar { padding: 40px 25px; }
-        .data-stream { font-family: monospace; font-size: 10px; color: var(--primary); opacity: 0.6; line-height: 2; margin-top: 20px; overflow: hidden; }
-        
-        .pulse-circle {
-            width: 80px; height: 80px;
-            border: 2px solid var(--primary);
-            border-radius: 50%;
-            margin: 0 auto 30px;
-            display: flex; align-items: center; justify-content: center;
-            animation: pulse 2s infinite;
-        }
+        .label-tech { font-size: 10px; font-weight: 900; color: var(--primary); letter-spacing: 5px; margin-bottom: 25px; text-transform: uppercase; opacity: 0.8; }
+        h1 { font-size: 44px; font-weight: 900; line-height: 1; margin-bottom: 25px; letter-spacing: -2.5px; }
+        .desc-text { font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.6); margin-bottom: 35px; }
 
-        @keyframes pulse { 
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0,255,255,0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(0,255,255,0); }
-            100% { transform: scale(1); }
-        }
-
-        /* ----------------------- 5. 主交互区 ----------------------- */
-        .main-panel { padding: 80px 60px; justify-content: center; }
-        
-        .label-tech {
-            font-size: 12px; font-weight: 800; letter-spacing: 5px;
-            color: var(--primary); text-transform: uppercase; margin-bottom: 15px;
-            text-shadow: var(--glow);
-        }
-
-        h1 {
-            font-size: 64px; font-weight: 900; line-height: 0.9;
-            margin-bottom: 25px; letter-spacing: -3px;
-            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-
-        .desc-text {
-            font-size: 18px; line-height: 1.6; color: rgba(255,255,255,0.8);
-            max-width: 500px; margin-bottom: 40px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-
-        /* ----------------------- 6. 极致按钮系统 ----------------------- */
-        .btn-stack { display: flex; flex-direction: column; gap: 15px; }
+        /* --- 3. 交互组件 --- */
+        .btn-stack { display: flex; flex-direction: column; gap: 18px; position: relative; z-index: 10; }
         .fancy-btn {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            padding: 26px 35px;
-            border-radius: 24px;
-            color: #fff; font-size: 16px; font-weight: 600;
-            text-align: left; transition: all 0.4s;
-            position: relative; overflow: hidden;
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            padding: 22px 35px; border-radius: 22px; color: #fff; font-size: 16px; font-weight: 600; text-align: left;
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
         }
-
         .fancy-btn:hover {
-            background: #fff; color: #000;
-            transform: translateX(15px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: rgba(255,255,255,1); color: #000; transform: translateX(20px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(255,255,255,0.2);
         }
 
-        .fancy-btn::after {
-            content: "→"; opacity: 0; transform: translateX(-20px); transition: 0.3s;
-        }
-        .fancy-btn:hover::after { opacity: 1; transform: translateX(0); }
+        .progress-box { width: 100%; height: 4px; background: rgba(255,255,255,0.08); margin-top: auto; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1); filter: drop-shadow(0 0 8px var(--primary)); }
 
-        /* ----------------------- 7. 进度显示器 ----------------------- */
-        .progress-container {
-            position: absolute; bottom: 60px; left: 60px; right: 60px;
-        }
-        .bar-bg { width: 100%; height: 2px; background: rgba(255,255,255,0.1); border-radius: 2px; }
-        .bar-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 15px var(--primary); }
-
-        /* ----------------------- 8. 结果页面 ----------------------- */
-        .result-container { display: none; text-align: center; animation: resultAppear 1.2s forwards; }
-        @keyframes resultAppear {
-            from { opacity: 0; filter: blur(20px); transform: scale(0.8); }
-            to { opacity: 1; filter: blur(0); transform: scale(1); }
+        /* --- 4. 结尾特效 --- */
+        .result-screen { display: none; text-align: center; justify-content: center; align-items: center; flex-direction: column; height: 100%; }
+        .shake { animation: intense-shake 0.5s infinite; }
+        @keyframes intense-shake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-8px, 4px) rotate(-1deg); }
+            40% { transform: translate(8px, -4px) rotate(1deg); }
+            60% { transform: translate(-10px, 0) scale(1.02); }
+            80% { transform: translate(10px, 4px); }
         }
 
-        .final-title {
-            font-size: 110px; font-weight: 900; letter-spacing: -6px;
-            background: linear-gradient(to bottom, #fff, #444);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin: 20px 0;
+        .glitch-text {
+            font-size: 110px; font-weight: 900; letter-spacing: -6px; margin: 20px 0;
+            text-shadow: 0 0 50px rgba(255,255,255,0.6);
         }
 
-        /* 辅助滤镜 */
+        .flash-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; opacity: 0; pointer-events: none; transition: 0.1s; }
         .hidden { display: none !important; }
-
     </style>
 </head>
 <body>
 
-    <canvas id="canvas-stage"></canvas>
-    <div class="noise-overlay"></div>
-
-    <div id="cursor-core"></div>
-    <div id="cursor-aura"></div>
-
-    <div class="master-frame" id="app">
-        
-        <aside class="glass-panel side-bar">
-            <div class="pulse-circle"><span id="sync-val">00</span>%</div>
-            <div class="label-tech" style="font-size: 10px; text-align: center;">Sensor Active</div>
-            <div class="data-stream" id="console">
-                [SYSTEM] Neural link ready...<br>
-                [STABLE] Environment 24°C<br>
-                [DATA] Syncing behavioral cache...
-            </div>
-        </aside>
-
-        <main class="glass-panel main-panel">
-            <div id="quiz-flow">
-                <div class="label-tech">Synapse v26.4 Neural Test</div>
-                <h1 id="title-main">人格指纹<br>深度校验。</h1>
-                <p class="desc-text" id="desc-main">本系统通过分析您对日常高频场景的潜意识反馈，构建高维人格拓扑模型。请在感官触发后立即做出选择。</p>
-                <div class="btn-stack" id="btn-stack">
-                    <button class="fancy-btn" onclick="startTest()">
-                        <span>INITIALIZE / 启动校验序列</span>
-                    </button>
-                </div>
-            </div>
-
-            <div id="result-screen" class="result-container">
-                <div class="label-tech">Decoding Complete</div>
-                <h1 class="final-title">你是GAY</h1>
-                <p class="desc-text" style="margin: 0 auto 30px;">基于 1024 位加密算法计算得出。该人格特质具有生物锁定性，结果已同步至神经中枢。</p>
-                <button class="fancy-btn" style="margin: 0 auto; width: 200px;" onclick="location.reload()">重新校验</button>
-            </div>
-
-            <div class="progress-container" id="p-bar">
-                <div class="bar-bg"><div class="bar-fill" id="progress"></div></div>
-            </div>
-        </main>
-
-        <aside class="glass-panel side-bar" style="font-size: 10px; line-height: 2.5; color: var(--text);">
-            <div class="label-tech">Bio Metrics</div>
-            HEART RATE: <span style="color:var(--primary)">72 BPM</span><br>
-            THETA WAVE: <span style="color:var(--primary)">14.2 Hz</span><br>
-            LATENCY: <span style="color:var(--primary)">0.003 ms</span><br>
-            <div style="margin-top: 40px;">
-                [ 测试说明 ]<br>
-                本算法利用非对称加密逻辑，捕捉您在 0.1s 内的行为抖动。
-            </div>
-        </aside>
-
-    </div>
-
-    <svg class="hidden">
-        <defs>
-            <filter id="liquid">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="liquid" />
-            </filter>
-        </defs>
+    <svg style="width:0; height:0; position:absolute;">
+        <filter id="gooey-ultra">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 45 -15" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+        </filter>
     </svg>
 
+    <div class="fluid-container">
+        <div class="blob"></div><div class="blob"></div><div class="blob"></div>
+    </div>
+
+    <div id="flash" class="flash-overlay"></div>
+
+    <div class="master-frame" id="frame">
+        <aside class="glass-panel" style="padding: 40px 25px;">
+            <div class="label-tech" style="text-align: center;">SYNAPSE_CORE</div>
+            <div id="console-logs" style="font-family: monospace; font-size: 11px; color: var(--primary); opacity: 0.8; line-height: 2.5; height: 100%; overflow: hidden;">
+                > 核心引擎注入成功<br>
+                > 增强玻璃折射: ON<br>
+                > 实时流体模拟: ON<br>
+                > 准备解析人格切片...
+            </div>
+        </aside>
+
+        <main class="glass-panel" id="main-panel">
+            <div id="quiz-flow" style="display: flex; flex-direction: column; height: 100%;">
+                <div class="label-tech">Deep Behavioral Scan</div>
+                <h1 id="q-title">高级潜意识<br>探测协议。</h1>
+                <p class="desc-text" id="q-desc">本系统将绕过表象逻辑，通过20组碎片行为重建您的真实人格镜像。请直觉响应。</p>
+                
+                <div class="btn-stack" id="btn-stack">
+                    <button class="fancy-btn" onclick="startTest()">启动深度连接</button>
+                </div>
+
+                <div class="progress-box"><div class="progress-fill" id="p-fill"></div></div>
+            </div>
+
+            <div id="result-screen" class="result-screen">
+                <div class="label-tech" style="color: var(--secondary);">>>> CRITICAL ANALYSIS COMPLETE <<<</div>
+                <h1 class="glitch-text" id="final-word" data-text="DECODING">DECODING</h1>
+                <p class="desc-text" style="color: #00f3ff; font-family: monospace; letter-spacing: 2px;">[ 人格指纹已锁定 ]</p>
+                <button class="fancy-btn" style="border-color: var(--secondary); margin-top: 20px;" onclick="location.reload()">清除本地缓存</button>
+            </div>
+        </main>
+    </div>
+
 <script>
-    // ----------------- 1. 高级流体动力学 -----------------
-    const canvas = document.getElementById('canvas-stage');
-    const ctx = canvas.getContext('2d');
-    let atoms = [];
+    const frame = document.getElementById('frame');
+    const panels = document.querySelectorAll('.glass-panel');
+    const logger = document.getElementById('console-logs');
 
-    function initAtoms() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        atoms = [];
-        for(let i=0; i<15; i++) {
-            atoms.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random()-0.5) * 0.8,
-                vy: (Math.random()-0.5) * 0.8,
-                r: Math.random() * 300 + 200,
-                color: i % 2 === 0 ? '#0033ff' : '#7000ff'
-            });
-        }
-    }
-
-    function animateAtoms() {
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0,0,canvas.width, canvas.height);
-        ctx.globalCompositeOperation = 'screen';
-        atoms.forEach(a => {
-            a.x += a.vx; a.y += a.vy;
-            if(a.x < -a.r) a.x = canvas.width + a.r;
-            if(a.x > canvas.width + a.r) a.x = -a.r;
-            if(a.y < -a.r) a.y = canvas.height + a.r;
-            if(a.y > canvas.height + a.r) a.y = -a.r;
-            
-            let g = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, a.r);
-            g.addColorStop(0, a.color);
-            g.addColorStop(1, 'transparent');
-            ctx.fillStyle = g;
-            ctx.beginPath();
-            ctx.arc(a.x, a.y, a.r, 0, Math.PI*2);
-            ctx.fill();
-        });
-        requestAnimationFrame(animateAtoms);
-    }
-    window.onresize = initAtoms;
-    initAtoms(); animateAtoms();
-
-    // ----------------- 2. 鼠标视差系统 -----------------
+    // --- 极致 3D 跟随 ---
     document.addEventListener('mousemove', e => {
-        const cx = e.clientX, cy = e.clientY;
-        document.getElementById('cursor-core').style.transform = `translate(${cx-4}px, ${cy-4}px)`;
-        document.getElementById('cursor-aura').style.transform = `translate(${cx-22}px, ${cy-22}px)`;
-        
-        const rx = (window.innerHeight/2 - cy) / 40;
-        const ry = (cx - window.innerWidth/2) / 60;
-        document.getElementById('app').style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+        const x = e.clientX, y = e.clientY;
+        const width = window.innerWidth, height = window.innerHeight;
+        const rotateX = ((height / 2) - y) / 90;
+        const rotateY = (x - (width / 2)) / 90;
+        frame.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        panels.forEach(p => {
+            const rect = p.getBoundingClientRect();
+            p.style.setProperty('--mouse-x', `${((x - rect.left) / rect.width) * 100}%`);
+            p.style.setProperty('--mouse-y', `${((y - rect.top) / rect.height) * 100}%`);
+        });
     });
 
-    // ----------------- 3. 题库逻辑 -----------------
+    // --- 扩充 20 题库 ---
     const questions = [
-        { q: "如果奶盖茶没有吸管，你会选择？", a: ["豪迈地掀盖喝", "找个勺子挖着吃", "优雅地撕开一个小口"] },
-        { q: "走进电梯发现只有你一个人，你会？", a: ["对着镜子整理发型", "疯狂按关门键", "发呆盯着楼层数字"] },
-        { q: "手机屏幕碎了一角，你的处理方式是？", a: ["强迫症发作立马换", "贴个胶带继续用", "视而不见直到报废"] },
-        { q: "在超市排队，前面的人突然说忘了拿东西离开，你会？", a: ["帮他守着位置", "直接挪到他前面", "内心翻白眼但保持沉默"] },
-        { q: "当你买了一件非常喜欢的衣服，你会？", a: ["留到重要场合再穿", "明天就穿出去炫耀", "洗完晾干后再决定"] },
-        { q: "看到一个外形奇怪的水果，你的第一反应？", a: ["查查能不能吃", "直接买一个试试", "拍张照发朋友圈"] },
-        { q: "睡觉前，你的最后一个动作通常是？", a: ["确认闹钟", "再刷5分钟短视频", "把手机插上充电线"] },
-        { q: "最后一项：当你看到这个测试结果时，你认为？", a: ["绝对精准", "存在逻辑误差", "仅供娱乐参考"] }
+        { q: "看到群里发红包，你的第一反应？", a: ["瞬间秒抢", "淡定观察", "从不关心"] },
+        { q: "朋友说了一段话你没听清：", a: ["假装听懂点头笑", "让他再说一遍", "直接不接话"] },
+        { q: "耳机线缠在一起时：", a: ["耐心解开", "暴力扯开试试", "直接不用了"] },
+        { q: "洗澡发现没带浴巾：", a: ["湿漉漉冲出去", "大喊求救", "等风干"] },
+        { q: "走在路上突然想起尴尬往事：", a: ["原地自闭", "老脸一红快步走", "假装没想起过"] },
+        { q: "手机电量剩下 1% 时：", a: ["全城找线", "心平气和看它灭", "立刻关机省电"] },
+        { q: "奶茶喝到最后剩下几颗珍珠：", a: ["吸到断气", "随缘吸", "直接扔"] },
+        { q: "进电梯发现有人一直盯着你：", a: ["盯回去", "看手机", "对他笑笑"] },
+        { q: "看到前任过得不如你：", a: ["窃喜", "无感", "发朋友圈庆祝"] },
+        { q: "被当众夸奖时：", a: ["尴尬想逃", "内心狂喜表面淡定", "怀疑对方有求于我"] },
+        { q: "买衣服发现穿反了：", a: ["找厕所换", "这叫个性", "假装不知道"] },
+        { q: "深夜想吃火锅但怕胖：", a: ["直接点单", "喝水看吃播", "立刻睡觉"] },
+        { q: "隐身一小时你会：", a: ["去做恶作剧", "去银行看看", "观察讨厌的人"] },
+        { q: "讨厌的人发了朋友圈：", a: ["心里吐槽", "屏蔽他", "假装没看见"] },
+        { q: "收到“在吗”的消息：", a: ["秒回", "看是谁决定在不在", "用意念回过了"] },
+        { q: "别人偷看你手机屏幕：", a: ["立刻关屏", "无所谓", "盯着他看"] },
+        { q: "被夸“你好聪明”：", a: ["那是当然", "客套一下", "他绝对想借钱"] },
+        { q: "想起明天要上班/上学：", a: ["痛苦哀嚎", "习惯了", "想消失"] },
+        { q: "死后墓碑上想写：", a: ["这人真帅", "终于能睡个好觉", "别看我了去玩吧"] },
+        { q: "最后，你觉得自己有病吗？", a: ["病入膏肓", "很正常", "我是天才"] }
     ];
 
-    let current = 0;
-    const qFlow = document.getElementById('quiz-flow');
-    const stack = document.getElementById('btn-stack');
-    const prog = document.getElementById('progress');
-    const consoleBox = document.getElementById('console');
-
-    function startTest() {
-        renderQuestion();
+    let step = 0;
+    function startTest() { render(); }
+    function render() {
+        if(step >= questions.length) { triggerNuclearEnding(); return; }
+        const data = questions[step];
+        document.getElementById('q-title').innerText = data.q;
+        document.getElementById('q-desc').innerText = `正在抓取第 ${step+1} 块人格碎片...`;
+        document.getElementById('p-fill').style.width = ((step+1)/questions.length)*100 + '%';
+        document.getElementById('btn-stack').innerHTML = data.a.map(opt => `<button class="fancy-btn" onclick="nextStep()">${opt}</button>`).join('');
+        
+        const log = document.createElement('div');
+        log.innerHTML = `> ANALYZING_CHUNK_${step+1}... SUCCESS`;
+        logger.prepend(log);
     }
+    function nextStep() { step++; render(); }
 
-    function renderQuestion() {
-        if(current >= questions.length) {
-            showFinal();
-            return;
-        }
+    function triggerNuclearEnding() {
+        document.getElementById('quiz-flow').classList.add('hidden');
+        document.getElementById('result-screen').style.display = 'flex';
+        const finalWord = document.getElementById('final-word');
+        const mainPanel = document.getElementById('main-panel');
+        const flash = document.getElementById('flash');
 
-        const data = questions[current];
-        const syncVal = Math.floor((current / questions.length) * 100);
-        document.getElementById('sync-val').innerText = syncVal.toString().padStart(2, '0');
-        prog.style.width = syncVal + '%';
-
-        // 模拟控制台数据
-        const l = document.createElement('div');
-        l.innerHTML = `> Step_${current+1}: Data segment synced...`;
-        consoleBox.prepend(l);
-
-        qFlow.style.opacity = 0;
-        qFlow.style.transform = "translateY(20px)";
+        mainPanel.classList.add('shake');
+        
+        // 乱码滚动
+        let scramble = setInterval(() => {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let s = ""; for(let i=0; i<5; i++) s += chars[Math.floor(Math.random()*36)];
+            finalWord.innerText = s;
+            finalWord.setAttribute('data-text', s);
+        }, 50);
 
         setTimeout(() => {
-            document.getElementById('title-main').innerText = data.q;
-            document.getElementById('desc-main').innerText = `Sequence Identifier: 0${current+1} / Behavioral Mapping Active.`;
-            stack.innerHTML = data.a.map(opt => `
-                <button class="fancy-btn" onclick="next()">
-                    <span>${opt}</span>
-                </button>
-            `).join('');
-            qFlow.style.opacity = 1;
-            qFlow.style.transform = "translateY(0)";
-        }, 400);
-    }
-
-    function next() {
-        current++;
-        renderQuestion();
-    }
-
-    function showFinal() {
-        document.getElementById('sync-val').innerText = "99";
-        prog.style.width = '100%';
-        qFlow.classList.add('hidden');
-        document.getElementById('p-bar').classList.add('hidden');
-        document.getElementById('result-screen').classList.remove('hidden');
-        document.getElementById('result-screen').style.display = 'block';
-        
-        const l = document.createElement('div');
-        l.style.color = "white";
-        l.innerHTML = `> ANALYSIS COMPLETE. <br> > FINAL STATE LOCKED.`;
-        consoleBox.prepend(l);
+            clearInterval(scramble);
+            flash.style.opacity = '1';
+            setTimeout(() => flash.style.opacity = '0', 150);
+            
+            finalWord.innerText = "你是GAY";
+            finalWord.setAttribute('data-text', "你是GAY");
+            mainPanel.classList.remove('shake');
+            
+            const log = document.createElement('div');
+            log.style.color = "#ff00ea";
+            log.innerHTML = `> [鉴定完毕] 真实身份已确立。`;
+            logger.prepend(log);
+        }, 1500);
     }
 </script>
 </body>
